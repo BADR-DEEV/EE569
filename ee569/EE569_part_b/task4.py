@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
-# ReLU Activation and Derivative
+#acativation function
 def relu(x):
     return np.maximum(0, x)
 
 def relu_derivative(x):
     return (x > 0).astype(float)
 
-# One-Hot Encoding
+#hot encoding
 def one_hot_encode(y, num_classes):
     one_hot = np.zeros((num_classes, len(y)))
     one_hot[y.astype(int), np.arange(len(y))] = 1
@@ -28,14 +28,14 @@ class Node:
     def backward(self):
         pass
 
-# Parameter Node
+#parameter node
 class Parameter(Node):
     def __init__(self, value):
         super().__init__()
         self.value = value
         self.grad = np.zeros_like(value)
 
-# Linear Layer Class
+
 class Linear(Node):
     def __init__(self, input_dim, output_dim):
         super().__init__()
@@ -52,17 +52,17 @@ class Linear(Node):
         self.b.grad = np.sum(dZ, axis=1, keepdims=True) / self.X.shape[1]
         return self.W.value.T @ dZ
 
-# Neural Network Class with Dynamic Graph
+
 class NeuralNetwork:
     def __init__(self, input_dim, hidden_dim, output_dim):
         self.nodes = []
         self.trainables = []
 
-        # Define Layers
+        # in here we defined the layers
         self.layer1 = Linear(input_dim, hidden_dim)
         self.layer2 = Linear(hidden_dim, output_dim)
 
-        # Collect Trainables Automatically
+     
         self._build_graph()
 
     def _build_graph(self):
@@ -89,13 +89,14 @@ class NeuralNetwork:
         for param in self.trainables:
             param.value -= lr * param.grad
 
-# Training Function
+#training 
 def train(model, X, y, epochs, learning_rate):
     losses = []
     for epoch in range(epochs):
-        current_lr = learning_rate / (1 + 0.01 * epoch)  # Decay learning rate
+#in here i addeed a decayed learning rate to get better results
+        current_lr = learning_rate / (1 + 0.01 * epoch)  
         
-        # Forward and Backward Pass
+        
         y_pred = model.forward(X)
         loss = -np.sum(y * np.log(y_pred + 1e-7)) / X.shape[1]
         model.backward(y)
@@ -106,41 +107,41 @@ def train(model, X, y, epochs, learning_rate):
             print(f"Epoch {epoch+1}, Loss: {loss:.4f}")
     return losses
 
-# Evaluate Function
+
 def evaluate(model, X, y):
     y_pred = model.forward(X)
     y_pred_labels = np.argmax(y_pred, axis=0)
     return np.mean(y_pred_labels == y) * 100
 
-# Load MNIST Dataset
+# we are loading mnist 
 mnist = datasets.load_digits()
 X, y = mnist['data'], mnist['target'].astype(int)
-X = X.T / 16.0  # Normalize the input data
+X = X.T / 16.0  #normlizing the data
 
-# Split Data into 60-40% train-test ratio
+#SPLITTING THE DATA INTO 60/40
 X_train, X_test, y_train, y_test = train_test_split(X.T, y, test_size=0.4, random_state=42)
 X_train, X_test = X_train.T, X_test.T
 y_train_onehot = one_hot_encode(y_train, 10)
 
-# Initialize Model
+
 input_dim, hidden_dim, output_dim = 64, 64, 10
 nn = NeuralNetwork(input_dim, hidden_dim, output_dim)
 
-# Train the Model
+
 losses = train(nn, X_train, y_train_onehot, epochs=200, learning_rate=0.1)
 
-# Plot Loss
+#plotting the loss 
 plt.plot(losses)
 plt.title("Training Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.show()
 
-# Evaluate
+
 accuracy = evaluate(nn, X_test, y_test)
 print(f"Test Accuracy: {accuracy:.2f}%")
 
-# Visualize First 10 Predictions
+
 y_pred = nn.forward(X_test)
 y_pred_labels = np.argmax(y_pred, axis=0)
 
