@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
 
-# Linear Node (Batch Version)
+# Linear Node with batching
 class Linear:
     def __init__(self, A, b):
         self.A = A
@@ -26,7 +26,7 @@ class Linear:
         return self.grad_x
 
 
-# Sigmoid Node
+# Sigmoid function
 class Sigmoid:
     def forward(self, x):
         self.value = 1 / (1 + np.exp(-x))
@@ -36,7 +36,7 @@ class Sigmoid:
         return grad_output * self.value * (1 - self.value)
 
 
-# Binary Cross-Entropy Loss
+# Binary Cross func 
 class BCE:
     def forward(self, target, prediction):
         batch_size = target.shape[1]
@@ -53,7 +53,7 @@ class BCE:
         return -(target / y_pred - (1 - target) / (1 - y_pred)) / batch_size
 
 
-# Generate XOR Dataset
+# Generating xor data
 def generate_xor_data(samples_per_class=100):
     np.random.seed(42)
     mean_00, cov = [-1, -1], [[0.1, 0], [0, 0.1]]
@@ -71,14 +71,14 @@ def generate_xor_data(samples_per_class=100):
     X1_2 = multivariate_normal.rvs(mean_10, cov, samples_per_class)
     X_class1 = np.vstack((X1_1, X1_2))
 
-    # Combine Data
+    # Combining data with verticl stack and horizentl stack functions
     X = np.vstack((X_class0, X_class1))
     y = np.hstack((np.zeros(len(X_class0)), np.ones(len(X_class1))))
 
     return X, y
 
 
-# Train Logistic Regression
+# i took some of the functionallity of the logistic reg function and implemneted it in one file 
 def train_logistic_regression(X, y, learning_rate=0.01, epochs=1000, batch_size=32):
     n_features = X.shape[1]
     A = np.random.randn(1, n_features) * 0.1  # Initialize weights
@@ -99,17 +99,18 @@ def train_logistic_regression(X, y, learning_rate=0.01, epochs=1000, batch_size=
             X_batch = X[i : i + batch_size].T
             y_batch = y[i : i + batch_size].reshape(1, -1)
 
-            # Forward
+          
             linear_output = linear_node.forward(X_batch)
             sigmoid_output = sigmoid_node.forward(linear_output)
             loss = bce_loss.forward(y_batch, sigmoid_output)
 
-            # Backward
+         
+
             grad_loss = bce_loss.backward(y_batch, sigmoid_output)
             grad_sigmoid = sigmoid_node.backward(grad_loss)
             linear_node.backward(grad_sigmoid)
 
-            # Update weights
+            # Updatingggg
             linear_node.A -= learning_rate * linear_node.grad_A
             linear_node.b -= learning_rate * linear_node.grad_b
             total_loss += loss
@@ -121,7 +122,7 @@ def train_logistic_regression(X, y, learning_rate=0.01, epochs=1000, batch_size=
     return linear_node, sigmoid_node, losses
 
 
-# Split Data into Train/Test (60/40 split)
+# Split Data into 60/40
 def split_data(X, y, train_ratio=0.6):
     np.random.seed(42)
     indices = np.random.permutation(len(X))
@@ -134,7 +135,7 @@ def split_data(X, y, train_ratio=0.6):
     return X_train, X_test, y_train, y_test
 
 
-# Plot Decision Boundary
+# Ploting decition boundary
 def plot_decision_boundary(linear_node, sigmoid_node, X, y):
     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
