@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
-# ----------------------------
-# Activation Functions and Derivatives
+
+#activitin function
 def relu(x):
     return np.maximum(0, x)
 
@@ -16,21 +16,20 @@ def sigmoid(x):
 def sigmoid_derivative(x):
     return sigmoid(x) * (1 - sigmoid(x))
 
-# ----------------------------
-# Binary Cross-Entropy Loss
+
+#binary Cross loss
 def binary_cross_entropy(y_true, y_pred):
-    y_pred = np.clip(y_pred, 1e-7, 1 - 1e-7)  # Avoid log(0)
     return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
-# ----------------------------
-# Parameter Node
+
+#parameter node
 class Parameter:
     def __init__(self, shape):
-        self.value = np.random.randn(*shape) * np.sqrt(2 / np.sum(shape))  # He Initialization
+        self.value = np.random.randn(*shape) * np.sqrt(2 / np.sum(shape))  
         self.grad = None
 
-# ----------------------------
-# Linear Node
+
+
 class Linear:
     """Fully connected layer with automated parameter initialization."""
     def __init__(self, input_dim, output_dim):
@@ -51,13 +50,13 @@ class Linear:
         grad_input = self.W.value.T @ grad_output
         return grad_input
 
-# ----------------------------
-# Data Generation: XOR-Like Dataset
+
+# generating xor data
 def generate_xor_data(samples_per_class=100):
     np.random.seed(42)
     mean_00, cov = [-1, -1], [[0.1, 0], [0, 0.1]]
     mean_01, mean_10, mean_11 = [1, -1], [-1, 1], [1, 1]
-
+#verticl stack and horiztl stack
     X0 = np.vstack((multivariate_normal.rvs(mean_00, cov, samples_per_class),
                     multivariate_normal.rvs(mean_11, cov, samples_per_class)))
     X1 = np.vstack((multivariate_normal.rvs(mean_01, cov, samples_per_class),
@@ -73,8 +72,8 @@ def split_data(X, y, train_ratio=0.6):
     train_size = int(len(X) * train_ratio)
     return X[indices[:train_size]].T, X[indices[train_size:]].T, y[indices[:train_size]], y[indices[train_size:]]
 
-# ----------------------------
-# Training Function
+
+#training
 def train(X, y, layers, epochs, learning_rate, batch_size):
     losses = []
     for epoch in range(epochs):
@@ -86,23 +85,23 @@ def train(X, y, layers, epochs, learning_rate, batch_size):
             X_batch = X[:, i:i+batch_size]
             y_batch = y[i:i+batch_size].reshape(1, -1)
 
-            # Forward Pass
+         
             activations = [X_batch]
             for layer in layers[:-1]:
                 activations.append(relu(layer.forward(activations[-1])))
             output = sigmoid(layers[-1].forward(activations[-1]))
 
-            # Compute Loss
+       
             loss = binary_cross_entropy(y_batch, output)
             epoch_loss += loss
 
-            # Backward Pass
+          
             grad_output = output - y_batch
             grad_input = layers[-1].backward(grad_output)
             for j in range(len(layers) - 2, -1, -1):
                 grad_input = layers[j].backward(grad_input * relu_derivative(activations[j + 1]))
 
-            # Update Parameters
+            #updating
             for layer in layers:
                 layer.W.value -= learning_rate * layer.W.grad
                 layer.b.value -= learning_rate * layer.b.grad
@@ -112,8 +111,8 @@ def train(X, y, layers, epochs, learning_rate, batch_size):
             print(f"Epoch {epoch+1}, Loss: {losses[-1]:.4f}")
     return losses
 
-# ----------------------------
-# Evaluate Model Accuracy
+
+
 def evaluate(layers, X, y):
     activations = [X]
     for layer in layers[:-1]:
@@ -123,8 +122,8 @@ def evaluate(layers, X, y):
     accuracy = np.mean(predictions == y.reshape(1, -1)) * 100
     return accuracy
 
-# ----------------------------
-# Decision Boundary Plot
+
+#ploting decition boundary
 def plot_decision_boundary(layers, X, y):
     x_min, x_max = X[0, :].min() - 1, X[0, :].max() + 1
     y_min, y_max = X[1, :].min() - 1, X[1, :].max() + 1
@@ -143,30 +142,29 @@ def plot_decision_boundary(layers, X, y):
     plt.ylabel("Feature 2")
     plt.show()
 
-# ----------------------------
-# Main Script
+
 X, y = generate_xor_data(100)
 X_train, X_test, y_train, y_test = split_data(X, y)
 
-# Define Neural Network Layers
+# in here i defined the nerual network Layers
 layers = [
-    Linear(2, 64),  # Input layer to Hidden Layer
-    Linear(64, 1)   # Hidden Layer to Output Layer
+    Linear(2, 64),  #this is my input 
+    Linear(64, 1)   # and this is the hidden layer to the output 
 ]
 
-# Train the Model
+# training
 losses = train(X_train, y_train, layers, epochs=100, learning_rate=0.01, batch_size=32)
 
-# Plot Training Loss
+# Plotting the trainging 
 plt.plot(losses)
 plt.title("Training Loss")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 plt.show()
 
-# Evaluate the Model
+
 accuracy = evaluate(layers, X_test, y_test)
 print(f"Test Accuracy: {accuracy:.2f}%")
 
-# Plot Decision Boundary
+
 plot_decision_boundary(layers, X_test, y_test)
