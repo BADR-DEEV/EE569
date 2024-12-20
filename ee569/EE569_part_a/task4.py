@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
 
-# Linear Node (Batch Version)
+#linear node with batching
 class Linear:
     def __init__(self, A, b):
         self.A = A
@@ -27,7 +27,7 @@ class Linear:
 
 
 
-# Sigmoid Node (Batch Version)
+# sigmoid with batching
 class Sigmoid:
     def __init__(self):
         self.value = None
@@ -43,7 +43,7 @@ class Sigmoid:
 
 
 
-# Binary Cross-Entropy Loss (Batch Version)
+# Binary Cross-Entropy Loss wit batching
 class BCE:
     def __init__(self):
         self.value = None
@@ -64,8 +64,8 @@ class BCE:
         return self.grad_input
 
 
-# ----------------------------- #
-# Data Generation
+
+#DARA GENERATION
 CLASS1_SIZE = 100
 CLASS2_SIZE = 100
 TEST_SIZE = 0.25
@@ -149,7 +149,7 @@ for BATCH_SIZE in BATCH_SIZES:
     print(f"Final Loss for Batch Size {BATCH_SIZE}: {epoch_losses[-1]}")
 
 # ------------------------- #
-# Plot Training Loss for Different Batch Sizes
+# Plot Training Loss for Different Batch Sizess
 plt.figure(figsize=(10, 6))
 for i, BATCH_SIZE in enumerate(BATCH_SIZES):
     plt.plot(range(1, EPOCHS + 1), batch_losses[i], label=f"Batch Size {BATCH_SIZE}")
