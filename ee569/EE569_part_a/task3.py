@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
 
-# Linear Node (Batch Version)
+# linear node with batching 
 class Linear:
     def __init__(self, A, b):
         self.A = A
-        # this change it to a column vector
+        # using this so we change it to a column and extract
         self.b = b.reshape(-1, 1)
+#initializing them none for know
         self.x = None
         self.grad_A = None
         self.grad_b = None
@@ -29,7 +30,7 @@ class Linear:
 
         return self.grad_x
 # ------------------------- #
-# Sigmoid Node (Batch Version)
+# Sigmoid Node with batchingg
 class Sigmoid:
     def __init__(self):
         self.value = None
@@ -42,10 +43,10 @@ class Sigmoid:
     def backward(self, grad_output):
         self.grad_input = (
             grad_output * self.value * (1 - self.value)
-        )  # Gradient of Sigmoid
+        )  
         return self.grad_input
 
-# Binary Cross-Entropy Loss (Batch Version)
+# Binary Cross-Entropy Loss with batching 
 class BCE:
     def __init__(self):
         self.value = None
@@ -54,7 +55,8 @@ class BCE:
     def forward(self, target, prediction):
         #target is ground truth, 
         # prediction is the output of the sigmoid
-        # target --> eg (100,32) 100 samples and 32 (features)
+#im explaing to myself for later (hello doctor if ur reading this)
+        # target ==> eg (100,32) 100 samples and 32 (features)
         # so tareget.shape[1] = 32
         batch_size = target.shape[1]
         y = target
@@ -75,7 +77,7 @@ class BCE:
 
 
 
-# Data Generation
+# DATAT GENERATONG
 CLASS1_SIZE = 100
 CLASS2_SIZE = 100
 BATCH_SIZE = 32
@@ -86,13 +88,12 @@ COV1 = np.array([[1, 0], [0, 1]])
 MEAN2 = np.array([1, -2])
 COV2 = np.array([[1, 0], [0, 1]])
 
-# Generate data
 X1 = multivariate_normal.rvs(MEAN1, COV1, CLASS1_SIZE)
 X2 = multivariate_normal.rvs(MEAN2, COV2, CLASS2_SIZE)
 X = np.vstack((X1, X2))
 y = np.hstack((np.zeros(CLASS1_SIZE), np.ones(CLASS2_SIZE)))
 
-# Shuffle and split
+# DATA SPLITTING
 indices = np.arange(X.shape[0])
 np.random.shuffle(indices)
 test_size = int(len(X) * TEST_SIZE)
@@ -102,18 +103,18 @@ test_indices = indices[:test_size]
 X_train, X_test = X[train_indices], X[test_indices]
 y_train, y_test = y[train_indices], y[test_indices]
 
-# Plot data
+# PLOTTING DATA
 plt.scatter(X[:, 0], X[:, 1], c=y)
 plt.title("Generated Data")
 plt.xlabel("Feature 1")
 plt.ylabel("Feature 2")
 plt.show()
 
-# ------------------------- #
-# Model Initialization
+
+# INIT
 n_features = X_train.shape[1]
-A = np.random.randn(1, n_features) * 0.1  # Weights
-b = np.random.randn(1) * 0.1  # Bias
+A = np.random.randn(1, n_features) * 0.1  
+b = np.random.randn(1) * 0.1  
 
 linear_node = Linear(A, b)
 sigmoid_node = Sigmoid()
@@ -122,34 +123,33 @@ bce_loss = BCE()
 LEARNING_RATE = 0.01
 EPOCHS = 150
 
-# ------------------------- #
-# Training Loop with Batching
+
 for epoch in range(EPOCHS):
     total_loss = 0
     num_batches = int(np.ceil(X_train.shape[0] / BATCH_SIZE))
 
     for batch_idx in range(num_batches):
-        # Batch indices
+       
         start_index = batch_idx * BATCH_SIZE
         end_index = min(start_index + BATCH_SIZE, X_train.shape[0])
 
-        # Fetch batch
-        X_batch = X_train[start_index:end_index].T  # (features, batch_size)
+       
+        X_batch = X_train[start_index:end_index].T  
         y_batch = y_train[start_index:end_index].reshape(
             1, -1
         )  # (1, batch_size) this means that we wand it to be a row vector
 
-        # Forward Pass
+      
         linear_output = linear_node.forward(X_batch)
         sigmoid_output = sigmoid_node.forward(linear_output)
         loss_value = bce_loss.forward(y_batch, sigmoid_output)
 
-        # Backward Pass
+      
         grad_loss = bce_loss.backward(y_batch, sigmoid_output)
         grad_sigmoid = sigmoid_node.backward(grad_loss)
         linear_node.backward(grad_sigmoid)
 
-        # Update Parameters
+        # WE ADDED UPDATE
         linear_node.A -= LEARNING_RATE * linear_node.grad_A
         linear_node.b -= LEARNING_RATE * linear_node.grad_b
 
@@ -157,14 +157,13 @@ for epoch in range(EPOCHS):
 
     print(f"Epoch {epoch + 1}, Loss: {total_loss / num_batches}")
 
-# ------------------------- #
-# Model Evaluation
+
 correct_predictions = 0
 for i in range(X_test.shape[0]):
     x = X_test[i].reshape(-1, 1)
     target = y_test[i]
 
-    # Forward Pass
+   
     linear_output = linear_node.forward(x)
     sigmoid_output = sigmoid_node.forward(linear_output)
 
@@ -175,8 +174,8 @@ for i in range(X_test.shape[0]):
 accuracy = correct_predictions / X_test.shape[0]
 print(f"Accuracy: {accuracy * 100:.2f}%")
 
-# ------------------------- #
-# Decision Boundary Plot
+
+# DECITION BOUNDARY
 x_min, x_max = X[:, 0].min(), X[:, 0].max()
 y_min, y_max = X[:, 1].min(), X[:, 1].max()
 xx, yy = np.meshgrid(np.linspace(x_min, x_max), np.linspace(y_min, y_max))
